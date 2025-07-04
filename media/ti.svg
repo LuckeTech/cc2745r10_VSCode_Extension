@@ -1,0 +1,15 @@
+<svg width="28" height="28" viewBox="0 0 13.94 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <style>.cls-1{fill:#a3a3a3;}</style>
+  </defs>
+  <title>TI</title>
+  <g>
+    <!-- T shape -->
+    <rect class="cls-1" x="3" y="2" width="7.9" height="2" rx="1"/>
+    <rect class="cls-1" x="5.5" y="4" width="2.9" height="7" rx="1"/>
+    <!-- I shape -->
+    <rect class="cls-1" x="10.5" y="4" width="1.5" height="7" rx="0.75"/>
+    <rect class="cls-1" x="10" y="11" width="2.5" height="1.5" rx="0.75"/>
+    <rect class="cls-1" x="10" y="2" width="2.5" height="1.5" rx="0.75"/>
+  </g>
+</svg>

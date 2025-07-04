@@ -1,0 +1,59 @@
+{
+    "name": "ti-cc2745r10-buttons",
+    "displayName": "TI CC2745R10 Build Buttons",
+    "publisher": "Benjamin Lucke",
+    "description": "Adds build, clean, flash, and debug buttons for TI CC2745R10 development",
+    "version": "1.0.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/LuckeTech/cc2745r10_VSCode_Extension.git"
+    },
+    "engines": {
+        "vscode": "^1.60.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:ti.clean",
+        "onCommand:ti.build",
+        "onCommand:ti.rebuild",
+        "onCommand:ti.flash",
+        "onCommand:ti.debug",
+        "onCommand:ti.serial"
+    ],
+    "main": "./src/extension.js",
+    "icon": "media/ti.png",
+    "contributes": {
+        "commands": [
+            { "command": "ti.clean", "title": "🧹 Clean", "category": "TI" },
+            { "command": "ti.build", "title": "🔨 Build", "category": "TI" },
+            { "command": "ti.rebuild", "title": "🔄 Rebuild", "category": "TI" },
+            { "command": "ti.flash", "title": "📡 Flash", "category": "TI" },
+            { "command": "ti.debug", "title": "🐛 Debug", "category": "TI" },
+            { "command": "ti.serial", "title": "📻 Serial", "category": "TI" }
+        ],
+        "menus": {
+            "editor/title": [
+                { "command": "ti.clean", "when": "resourceExtname == .c || resourceExtname == .h", "group": "navigation@1" },
+                { "command": "ti.build", "when": "resourceExtname == .c || resourceExtname == .h", "group": "navigation@2" },
+                { "command": "ti.flash", "when": "resourceExtname == .c || resourceExtname == .h", "group": "navigation@3" }
+            ]
+        },
+        "viewsContainers": {
+            "activitybar": [
+                { "id": "ti-projects", "title": "TI Projects", "icon": "media/ti.svg" }
+            ]
+        },
+        "views": {
+            "ti-projects": [
+                { "id": "tiProjectExplorer", "name": "TI Project Explorer", "icon": "media/ti.svg" }
+            ]
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "echo 'No compilation needed'",
+        "watch": "echo 'No watch needed'"
+    }
+}

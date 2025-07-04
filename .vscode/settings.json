@@ -1,0 +1,70 @@
+﻿{
+    "C_Cpp.default.compilerPath": "C:/ti/ccs2020/ccs/tools/compiler/ti-cgt-armllvm_4.0.3.LTS/bin/tiarmclang.exe",
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/Release/compile_commands.json",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/Release",
+        "${workspaceFolder}/app/inc",
+        "C:/ti/simplelink_lowpower_f3_sdk_9_11_00_18/source",
+        "C:/ti/simplelink_lowpower_f3_sdk_9_11_00_18/source/ti",
+        "C:/ti/simplelink_lowpower_f3_sdk_9_11_00_18/source/ti/common/cc26xx",
+        "${workspaceFolder}/app",
+        "C:/ti/simplelink_lowpower_f3_sdk_9_11_00_18/source/ti/drivers/rcl",
+        "C:/ti/simplelink_lowpower_f3_sdk_9_11_00_18/source/ti/posix/ticlang",
+        "C:/ti/simplelink_lowpower_f3_sdk_9_11_00_18/source/third_party/freertos/include",
+        "C:/ti/simplelink_lowpower_f3_sdk_9_11_00_18/source/third_party/freertos/portable/GCC/ARM_CM33_NTZ/non_secure",
+        "C:/ti/simplelink_lowpower_f3_sdk_9_11_00_18/kernel/freertos",
+        "${workspaceFolder}/Release/syscfg"
+    ],
+    "C_Cpp.default.defines": [
+        "CAR_ACCESS_SERVER",
+        "CC23X0",
+        "ICALL_NO_APP_EVENTS",
+        "USE_HSM",
+        "NVOCMP_NWSAMEITEM=1",
+        "NVOCMP_NVPAGES=6",
+        "FREERTOS",
+        "NVOCMP_POSIX_MUTEX",
+        "__CC2745R10__",
+        "__ARM_ARCH_8M_MAIN__"
+    ],
+    "C_Cpp.default.cStandard": "c99",
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.intelliSenseMode": "gcc-arm",
+    "files.associations": {
+        "*.h": "c",
+        "*.c": "c",
+        "*.syscfg": "javascript",
+        "*.cmd": "linkerscript",
+        "*.cfg": "ini"
+    },
+    "files.exclude": {
+        "**/Release/**/*.o": true,
+        "**/Release/**/*.d": true,
+        "**/Release/**/*.d_raw": true,
+        "**/Release/**/*.map": true,
+        "**/Release/**/*.xml": true,
+        "**/Release/syscfg/*.opt": true
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "cmake.configureOnOpen": false,
+    "clangd.path": "C:/ti/ccs2020/ccs/tools/compiler/ti-cgt-armllvm_4.0.3.LTS/bin/clangd.exe",
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}/Release",
+        "--background-index",
+        "--clang-tidy",
+        "--target=arm-none-eabi"
+    ],
+    "cortex-debug.enableTelemetry": false,
+    "cortex-debug.gdbPath": "C:/ti/ccs2020/ccs/tools/compiler/ti-cgt-armllvm_4.0.3.LTS/bin/arm-none-eabi-gdb.exe",
+    "ti.ccs.installPath": "C:/ti/ccs2020/ccs",
+    "ti.sdk.installPath": "C:/ti/simplelink_lowpower_f3_sdk_9_11_00_18",
+    "tasks.showDecorations": true,
+    "tasks.autoDetect": "on",
+    "tasks.quickOpen.detail": true,
+    "tasks.quickOpen.skip": false,
+    "tasks.saveBeforeRun": "always",
+    "workbench.view.explorer.openEditors.visible": 1,
+    "explorer.decorations.colors": true,
+    "explorer.decorations.badges": true
+}

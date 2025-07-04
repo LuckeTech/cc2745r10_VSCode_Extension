@@ -1,0 +1,42 @@
+﻿[
+    {
+        "key": "ctrl+shift+b",
+        "command": "workbench.action.tasks.runTask",
+        "args": "TI Build",
+        "when": "!inDebugMode"
+    },
+    {
+        "key": "ctrl+shift+c",
+        "command": "workbench.action.tasks.runTask",
+        "args": "TI Clean"
+    },
+    {
+        "key": "ctrl+shift+f",
+        "command": "workbench.action.tasks.runTask",
+        "args": "TI Flash CC2745R10"
+    },
+    {
+        "key": "ctrl+alt+f",
+        "command": "workbench.action.tasks.runTask",
+        "args": "TI Flash with Uniflash"
+    },
+    {
+        "key": "ctrl+shift+d",
+        "command": "workbench.action.debug.start"
+    },
+    {
+        "key": "ctrl+shift+m",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Open TI Serial Monitor"
+    },
+    {
+        "key": "f5",
+        "command": "workbench.action.debug.start",
+        "when": "!inDebugMode"
+    },
+    {
+        "key": "shift+f5",
+        "command": "workbench.action.debug.stop",
+        "when": "inDebugMode"
+    }
+]

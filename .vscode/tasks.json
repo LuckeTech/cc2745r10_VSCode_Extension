@@ -1,0 +1,163 @@
+﻿{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "TI Clean",
+            "type": "shell",
+            "command": "C:\\ti\\ccs2020\\ccs\\utils\\bin\\gmake.exe",
+            "args": ["-k", "-j", "20", "clean", "-O"],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/Release"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false
+            },
+            "problemMatcher": [],
+            "icon": {
+                "id": "trash",
+                "color": "terminal.ansiYellow"
+            }
+        },
+        {
+            "label": "TI Build",
+            "type": "shell",
+            "command": "C:\\ti\\ccs2020\\ccs\\utils\\bin\\gmake.exe",
+            "args": ["-k", "-j", "20", "all", "-O"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/Release"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false
+            },
+            "problemMatcher": [
+                {
+                    "owner": "ticlang",
+                    "fileLocation": "relative",
+                    "pattern": {
+                        "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "severity": 4,
+                        "message": 5
+                    }
+                }
+            ],
+            "icon": {
+                "id": "tools",
+                "color": "terminal.ansiGreen"
+            }
+        },
+        {
+            "label": "TI Rebuild",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "TI Clean",
+                "TI Build"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false
+            },
+            "icon": {
+                "id": "sync",
+                "color": "terminal.ansiBlue"
+            }
+        },
+        {
+            "label": "TI Flash",
+            "type": "shell",
+            "command": "C:\\ti\\uniflash_8.8.0\\dslite.bat",
+            "args": [
+                "--mode", "processors",
+                "-c", "C:\\ti\\ccs2020\\ccs\\ccs_base\\common\\targetdb\\connections\\TIXDS110_Connection.xml",
+                "-f", "${workspaceFolder}/Release/car_node_LP_EM_CC2745R10_Q1_freertos_ticlang.hex",
+                "-v"
+            ],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false
+            },
+            "problemMatcher": [],
+            "dependsOn": "TI Build",
+            "icon": {
+                "id": "debug-alt",
+                "color": "terminal.ansiMagenta"
+            }
+        },
+        {
+            "label": "TI Debug",
+            "type": "shell",
+            "command": "C:\\ti\\ccs2020\\ccs\\ccs_base\\DebugServer\\bin\\DSLite.exe",
+            "args": [
+                "load",
+                "-c", "C:\\ti\\ccs2020\\ccs\\ccs_base\\common\\targetdb\\connections\\TIXDS110_Connection.xml",
+                "-f", "${workspaceFolder}/Release/car_node_LP_EM_CC2745R10_Q1_freertos_ticlang.out"
+            ],
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false
+            },
+            "problemMatcher": [],
+            "isBackground": true,
+            "dependsOn": "TI Build",
+            "icon": {
+                "id": "bug",
+                "color": "terminal.ansiRed"
+            }
+        },
+        {
+            "label": "TI Serial Monitor",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-Command",
+                "Write-Host 'Available COM Ports for TI CC2745R10:'; Get-WmiObject -Class Win32_SerialPort | Where-Object {$_.Description -like '*XDS*' -or $_.Description -like '*UART*'} | Select-Object DeviceID, Description; $port = Read-Host 'Enter COM port (e.g., COM3)'; if($port) { mode $port BAUD=115200 PARITY=N DATA=8 STOP=1; Write-Host 'Serial port configured. Press Ctrl+C to exit.'; Get-Content $port -Wait } else { Write-Host 'No port specified' }"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new",
+                "showReuseMessage": false
+            },
+            "problemMatcher": [],
+            "icon": {
+                "id": "radio-tower",
+                "color": "terminal.ansiCyan"
+            }
+        }
+    ]
+}

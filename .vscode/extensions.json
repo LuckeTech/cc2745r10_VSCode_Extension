@@ -1,0 +1,21 @@
+﻿{
+    "recommendations": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "marus25.cortex-debug",
+        "ms-vscode.hexeditor",
+        "ms-vscode.powershell",
+        "ms-vscode.vscode-serial-monitor",
+        "formulahendry.code-runner",
+        "austin.code-gnu-global",
+        "dan-c-underwood.arm",
+        "zixuanwang.linkerscript",
+        "ms-vscode.cmake-tools",
+        "actboy168.tasks"
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.vscode-arduino",
+        "platformio.platformio-ide"
+    ]
+}

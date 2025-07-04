@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch CCS Debug Session",
+            "type": "node",
+            "request": "launch",
+            "program": "C:/ti/ccs2020/ccs/eclipse/ccstudio.exe",
+            "args": [
+                "-noSplash",
+                "-data", "${workspaceFolder}",
+                "-debug", "${workspaceFolder}/Release/car_node_LP_EM_CC2745R10_Q1_freertos_ticlang.out"
+            ],
+            "console": "externalTerminal",
+            "preLaunchTask": "TI Build"
+        }
+    ]
+}
