@@ -84,11 +84,6 @@
     "configuration": {
         "title": "TI CC2745R10",
         "properties": {
-            "tiCCS.projectFolder": {
-                "type": "string",
-                "default": "",
-                "description": "Path to your TI CC2745R10 project folder"
-            },
             "tiCCS.ccsPath": {
                 "type": "string",
                 "default": "C:/ti/ccs2020/ccs/eclipse/ccstudio.exe",

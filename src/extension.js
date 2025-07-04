@@ -9,9 +9,15 @@ function getConfig() {
 }
 
 function isConfigured() {
-    const config = getConfig();
-    const folder = config.get('projectFolder');
-    return folder && folder.trim() !== '';
+    // Always configured if we have a workspace folder open
+    return vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0;
+}
+
+function getProjectFolder() {
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+        return vscode.workspace.workspaceFolders[0].uri.fsPath;
+    }
+    return null;
 }
 
 function checkToolExists(toolPath) {
@@ -24,13 +30,11 @@ function checkToolExists(toolPath) {
 
 function promptForConfig() {
     vscode.window.showErrorMessage(
-        'TI CC2745R10: Extension is not properly configured. Would you like to configure it now?',
-        'Configure Now', 'Open Settings'
+        'TI CC2745R10: No workspace folder is open. Please open a project folder first.',
+        'Open Folder'
     ).then(selection => {
-        if (selection === 'Configure Now') {
-            vscode.commands.executeCommand('ti.configure');
-        } else if (selection === 'Open Settings') {
-            vscode.commands.executeCommand('workbench.action.openSettings', '@ext:undefined_publisher.ti-cc2745r10-buttons');
+        if (selection === 'Open Folder') {
+            vscode.commands.executeCommand('vscode.openFolder');
         }
     });
 }
@@ -77,48 +81,65 @@ async function openInCCS(projectPath) {
         return;
     }
     
+    // Use provided path or current workspace
+    const targetPath = projectPath || getProjectFolder();
+    if (!targetPath) {
+        vscode.window.showErrorMessage('No project folder available.');
+        return;
+    }
+    
     const terminal = vscode.window.createTerminal('CCS');
-    terminal.sendText(`"${ccsPath}" -data "${projectPath}"`);
+    terminal.sendText(`"${ccsPath}" -data "${targetPath}"`);
     terminal.show();
 }
 
 async function configureExtension() {
     const config = getConfig();
     
-    // Project Folder
-    const projectFolder = await vscode.window.showInputBox({
-        prompt: 'Enter your TI CC2745R10 project folder path',
-        value: config.get('projectFolder') || '',
-        placeHolder: 'C:/path/to/your/project'
+    // Show configuration options (removed project folder since it's automatic)
+    const options = [
+        'Configure SysConfig Tool Path',
+        'Configure Code Composer Studio Path',
+        'Open All Settings'
+    ];
+    
+    const selection = await vscode.window.showQuickPick(options, {
+        placeHolder: 'What would you like to configure?'
     });
     
-    if (projectFolder) {
-        await config.update('projectFolder', projectFolder, vscode.ConfigurationTarget.Workspace);
+    if (!selection) return;
+    
+    switch (selection) {
+        case 'Configure SysConfig Tool Path':
+            const sysconfigPath = await vscode.window.showInputBox({
+                prompt: 'Enter path to SysConfig executable',
+                value: config.get('sysconfigPath') || 'C:/ti/sysconfig_1.24.1/nw/nw.exe',
+                placeHolder: 'C:/ti/sysconfig_1.24.1/nw/nw.exe'
+            });
+            
+            if (sysconfigPath) {
+                await config.update('sysconfigPath', sysconfigPath, vscode.ConfigurationTarget.Global);
+                vscode.window.showInformationMessage('SysConfig tool path configured!');
+            }
+            break;
+            
+        case 'Configure Code Composer Studio Path':
+            const ccsPath = await vscode.window.showInputBox({
+                prompt: 'Enter path to Code Composer Studio executable',
+                value: config.get('ccsPath') || 'C:/ti/ccs2020/ccs/eclipse/ccstudio.exe',
+                placeHolder: 'C:/ti/ccs2020/ccs/eclipse/ccstudio.exe'
+            });
+            
+            if (ccsPath) {
+                await config.update('ccsPath', ccsPath, vscode.ConfigurationTarget.Global);
+                vscode.window.showInformationMessage('Code Composer Studio path configured!');
+            }
+            break;
+            
+        case 'Open All Settings':
+            vscode.commands.executeCommand('workbench.action.openSettings', '@ext:undefined_publisher.ti-cc2745r10-buttons');
+            break;
     }
-    
-    // CCS Path
-    const ccsPath = await vscode.window.showInputBox({
-        prompt: 'Enter path to Code Composer Studio executable',
-        value: config.get('ccsPath') || 'C:/ti/ccs2020/ccs/eclipse/ccstudio.exe',
-        placeHolder: 'C:/ti/ccs2020/ccs/eclipse/ccstudio.exe'
-    });
-    
-    if (ccsPath) {
-        await config.update('ccsPath', ccsPath, vscode.ConfigurationTarget.Global);
-    }
-    
-    // SysConfig Path
-    const sysconfigPath = await vscode.window.showInputBox({
-        prompt: 'Enter path to SysConfig executable',
-        value: config.get('sysconfigPath') || 'C:/ti/sysconfig_1.24.1/nw/nw.exe',
-        placeHolder: 'C:/ti/sysconfig_1.24.1/nw/nw.exe'
-    });
-    
-    if (sysconfigPath) {
-        await config.update('sysconfigPath', sysconfigPath, vscode.ConfigurationTarget.Global);
-    }
-    
-    vscode.window.showInformationMessage('TI CC2745R10 extension configured successfully!');
 }
 
 function runTaskOrPrompt(taskName) {
@@ -269,27 +290,14 @@ function activate(context) {
     });
 
     const openCCSCmd = vscode.commands.registerCommand('ti.openCCS', async (uri) => {
-        const config = getConfig();
-        let projectPath = uri?.fsPath || config.get('projectFolder');
+        let projectPath = uri?.fsPath || getProjectFolder();
         
         if (!projectPath) {
-            const selected = await vscode.window.showOpenDialog({
-                canSelectFiles: false,
-                canSelectFolders: true,
-                title: 'Select Project Folder'
-            });
-            
-            if (selected && selected[0]) {
-                projectPath = selected[0].fsPath;
-                await config.update('projectFolder', projectPath, vscode.ConfigurationTarget.Workspace);
-            }
+            vscode.window.showWarningMessage('No project folder available. Please open a folder in VS Code first.');
+            return;
         }
         
-        if (projectPath) {
-            await openInCCS(projectPath);
-        } else {
-            vscode.window.showWarningMessage('No project folder configured or selected.');
-        }
+        await openInCCS(projectPath);
     });
 
     const configureCmd = vscode.commands.registerCommand('ti.configure', configureExtension);
@@ -306,23 +314,26 @@ function activate(context) {
     // Check configuration on startup
     if (!isConfigured()) {
         vscode.window.showInformationMessage(
-            'TI CC2745R10 extension activated! Click the gear icon in the status bar to configure.',
-            'Configure Now'
+            'TI CC2745R10 extension activated! Open a project folder to get started.',
+            'Open Folder'
         ).then(selection => {
-            if (selection === 'Configure Now') {
-                vscode.commands.executeCommand('ti.configure');
+            if (selection === 'Open Folder') {
+                vscode.commands.executeCommand('vscode.openFolder');
             }
         });
     } else {
-        vscode.window.showInformationMessage('TI CC2745R10 build tools are ready!');
+        const projectPath = getProjectFolder();
+        vscode.window.showInformationMessage(`TI CC2745R10 build tools ready for: ${path.basename(projectPath)}`);
     }
 
-    // Auto-detect .syscfg files and show context action
+    // Auto-detect .syscfg files and show context action (only once per session)
+    let syscfgPromptShown = false;
     vscode.window.onDidChangeActiveTextEditor((editor) => {
-        if (editor && editor.document.fileName.endsWith('.syscfg')) {
+        if (editor && editor.document.fileName.endsWith('.syscfg') && !syscfgPromptShown) {
+            syscfgPromptShown = true;
             vscode.window.showInformationMessage(
                 'SysConfig file detected. You can open it with the TI SysConfig tool.',
-                'Open in SysConfig'
+                'Open in SysConfig', 'Don\'t ask again'
             ).then(selection => {
                 if (selection === 'Open in SysConfig') {
                     vscode.commands.executeCommand('ti.openSysConfig');
