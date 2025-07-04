@@ -43,14 +43,14 @@ async function openSysConfigFile(filePath) {
     const config = getConfig();
     const sysconfigPath = config.get('sysconfigPath');
     
-    if (!checkToolExists(sysconfigPath)) {
+    if (!sysconfigPath || !checkToolExists(sysconfigPath)) {
         const result = await vscode.window.showErrorMessage(
-            `SysConfig tool not found at: ${sysconfigPath}`,
-            'Update Path', 'Browse for Tool'
+            sysconfigPath ? `SysConfig tool not found at: ${sysconfigPath}` : 'SysConfig tool path not configured.',
+            'Configure Path', 'Browse for Tool'
         );
         
-        if (result === 'Update Path') {
-            vscode.commands.executeCommand('workbench.action.openSettings', 'tiCCS.sysconfigPath');
+        if (result === 'Configure Path') {
+            vscode.commands.executeCommand('ti.configure');
         } else if (result === 'Browse for Tool') {
             const selected = await vscode.window.showOpenDialog({
                 canSelectFiles: true,
@@ -68,7 +68,12 @@ async function openSysConfigFile(filePath) {
     }
     
     const terminal = vscode.window.createTerminal('SysConfig');
-    terminal.sendText(`"${sysconfigPath}" "${filePath}"`);
+    // Get the directory containing the executable for the working directory
+    const sysconfigDir = path.dirname(sysconfigPath);
+    const parentDir = path.dirname(sysconfigDir); // Go up one level to get the main sysconfig directory
+    
+    // Launch SysConfig with proper working directory and file path
+    terminal.sendText(`cd "${parentDir}" && "${sysconfigPath}" "${parentDir}" "${filePath}"`);
     terminal.show();
 }
 
@@ -76,8 +81,27 @@ async function openInCCS(projectPath) {
     const config = getConfig();
     const ccsPath = config.get('ccsPath');
     
-    if (!checkToolExists(ccsPath)) {
-        vscode.window.showErrorMessage(`Code Composer Studio not found at: ${ccsPath}`);
+    if (!ccsPath || !checkToolExists(ccsPath)) {
+        const result = await vscode.window.showErrorMessage(
+            ccsPath ? `Code Composer Studio not found at: ${ccsPath}` : 'Code Composer Studio path not configured.',
+            'Configure Path', 'Browse for Tool'
+        );
+        
+        if (result === 'Configure Path') {
+            vscode.commands.executeCommand('ti.configure');
+        } else if (result === 'Browse for Tool') {
+            const selected = await vscode.window.showOpenDialog({
+                canSelectFiles: true,
+                canSelectFolders: false,
+                filters: { 'Executable': ['exe'] },
+                title: 'Select Code Composer Studio'
+            });
+            
+            if (selected && selected[0]) {
+                await config.update('ccsPath', selected[0].fsPath, vscode.ConfigurationTarget.Global);
+                openInCCS(projectPath);
+            }
+        }
         return;
     }
     
@@ -94,51 +118,62 @@ async function openInCCS(projectPath) {
 }
 
 async function configureExtension() {
+    console.log('configureExtension() called');
     const config = getConfig();
     
-    // Show configuration options (removed project folder since it's automatic)
-    const options = [
-        'Configure SysConfig Tool Path',
-        'Configure Code Composer Studio Path',
-        'Open All Settings'
-    ];
-    
-    const selection = await vscode.window.showQuickPick(options, {
-        placeHolder: 'What would you like to configure?'
-    });
-    
-    if (!selection) return;
-    
-    switch (selection) {
-        case 'Configure SysConfig Tool Path':
-            const sysconfigPath = await vscode.window.showInputBox({
-                prompt: 'Enter path to SysConfig executable',
-                value: config.get('sysconfigPath') || 'C:/ti/sysconfig_1.24.1/nw/nw.exe',
-                placeHolder: 'C:/ti/sysconfig_1.24.1/nw/nw.exe'
-            });
-            
-            if (sysconfigPath) {
-                await config.update('sysconfigPath', sysconfigPath, vscode.ConfigurationTarget.Global);
-                vscode.window.showInformationMessage('SysConfig tool path configured!');
-            }
-            break;
-            
-        case 'Configure Code Composer Studio Path':
-            const ccsPath = await vscode.window.showInputBox({
-                prompt: 'Enter path to Code Composer Studio executable',
-                value: config.get('ccsPath') || 'C:/ti/ccs2020/ccs/eclipse/ccstudio.exe',
-                placeHolder: 'C:/ti/ccs2020/ccs/eclipse/ccstudio.exe'
-            });
-            
-            if (ccsPath) {
-                await config.update('ccsPath', ccsPath, vscode.ConfigurationTarget.Global);
-                vscode.window.showInformationMessage('Code Composer Studio path configured!');
-            }
-            break;
-            
-        case 'Open All Settings':
-            vscode.commands.executeCommand('workbench.action.openSettings', '@ext:undefined_publisher.ti-cc2745r10-buttons');
-            break;
+    try {
+        // Show configuration options (removed project folder since it's automatic)
+        const options = [
+            'Configure SysConfig Tool Path',
+            'Configure Code Composer Studio Path',
+            'Open All Settings'
+        ];
+        
+        const selection = await vscode.window.showQuickPick(options, {
+            placeHolder: 'What would you like to configure?'
+        });
+        
+        if (!selection) {
+            console.log('No selection made');
+            return;
+        }
+        
+        console.log('Selected:', selection);
+        
+        switch (selection) {
+            case 'Configure SysConfig Tool Path':
+                const sysconfigPath = await vscode.window.showInputBox({
+                    prompt: 'Enter path to SysConfig executable (nw.exe)',
+                    value: config.get('sysconfigPath') || 'C:/ti/sysconfig_1.24.1/nw/nw.exe',
+                    placeHolder: 'C:/ti/sysconfig_1.24.1/nw/nw.exe'
+                });
+                
+                if (sysconfigPath) {
+                    await config.update('sysconfigPath', sysconfigPath, vscode.ConfigurationTarget.Global);
+                    vscode.window.showInformationMessage('SysConfig tool path configured! The tool will be launched with proper working directory.');
+                }
+                break;
+                
+            case 'Configure Code Composer Studio Path':
+                const ccsPath = await vscode.window.showInputBox({
+                    prompt: 'Enter path to Code Composer Studio executable',
+                    value: config.get('ccsPath') || 'C:/ti/ccs2020/ccs/eclipse/ccstudio.exe',
+                    placeHolder: 'C:/ti/ccs2020/ccs/eclipse/ccstudio.exe'
+                });
+                
+                if (ccsPath) {
+                    await config.update('ccsPath', ccsPath, vscode.ConfigurationTarget.Global);
+                    vscode.window.showInformationMessage('Code Composer Studio path configured!');
+                }
+                break;
+                
+            case 'Open All Settings':
+                vscode.commands.executeCommand('workbench.action.openSettings', '@ext:benjamin-lucke.ti-cc2745r10-buttons');
+                break;
+        }
+    } catch (error) {
+        console.error('Error in configureExtension:', error);
+        vscode.window.showErrorMessage(`Configuration error: ${error.message}`);
     }
 }
 
@@ -153,27 +188,37 @@ function runTaskOrPrompt(taskName) {
 function activate(context) {
     console.log('TI CC2745R10 Buttons extension activated');
 
-    // Create separator status bar items
-    const leftSeparator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 110);
+    // Register commands FIRST
+    const configureCmd = vscode.commands.registerCommand('ti.configure', () => {
+        console.log('Configure command triggered');
+        configureExtension();
+    });
+
+    // Add to context immediately
+    context.subscriptions.push(configureCmd);
+
+    // Create separator status bar items with much higher priorities for better grouping
+    const leftSeparator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 200);
     leftSeparator.text = '$(circuit-board)';
-    leftSeparator.tooltip = 'TI CC2745R10 Tools';
+    leftSeparator.tooltip = 'TI CC2745R10 Tools - Click to configure';
+    leftSeparator.command = 'ti.configure';
     leftSeparator.backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
 
-    const rightSeparator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 94);
+    const rightSeparator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 180);
     rightSeparator.text = '|';
     rightSeparator.tooltip = 'TI Tools End';
     rightSeparator.backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
 
-    // Create status bar items with better priorities
-    const cleanButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 109);
-    const buildButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 108);
-    const rebuildButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 107);
-    const flashButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 106);
-    const debugButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 105);
-    const serialButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 104);
-    const sysconfigButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 103);
-    const ccsButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 102);
-    const configButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 101);
+    // Create status bar items with much higher priorities to group them together
+    const cleanButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 199);
+    const buildButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 198);
+    const rebuildButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 197);
+    const flashButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 196);
+    const debugButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 195);
+    const serialButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 194);
+    const sysconfigButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 193);
+    const ccsButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 192);
+    const configButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 191);
 
     // Configure buttons with better styling
     cleanButton.text = "$(trash)";
@@ -204,7 +249,7 @@ function activate(context) {
     serialButton.tooltip = "Open serial monitor";
     serialButton.command = "ti.serial";
 
-    sysconfigButton.text = "$(gear)";
+    sysconfigButton.text = "$(settings)";
     sysconfigButton.tooltip = "Open SysConfig for current file";
     sysconfigButton.command = "ti.openSysConfig";
 
@@ -212,9 +257,10 @@ function activate(context) {
     ccsButton.tooltip = "Open project in Code Composer Studio";
     ccsButton.command = "ti.openCCS";
 
-    configButton.text = "$(settings-gear)";
-    configButton.tooltip = "Configure TI CC2745R10 extension";
+    configButton.text = "$(tools) Config";
+    configButton.tooltip = "Configure TI CC2745R10 extension - Click to setup paths";
     configButton.command = "ti.configure";
+    configButton.backgroundColor = new vscode.ThemeColor('statusBarItem.activeBackground');
 
     // Show buttons
     leftSeparator.show();
@@ -300,15 +346,13 @@ function activate(context) {
         await openInCCS(projectPath);
     });
 
-    const configureCmd = vscode.commands.registerCommand('ti.configure', configureExtension);
-
     // Add to context
     context.subscriptions.push(
         leftSeparator, rightSeparator,
         cleanButton, buildButton, rebuildButton, flashButton, debugButton, serialButton,
         sysconfigButton, ccsButton, configButton,
         cleanCmd, buildCmd, rebuildCmd, flashCmd, debugCmd, serialCmd,
-        openSysConfigCmd, openCCSCmd, configureCmd
+        openSysConfigCmd, openCCSCmd
     );
 
     // Check configuration on startup

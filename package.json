@@ -1,7 +1,7 @@
 {
     "name": "ti-cc2745r10-buttons",
     "displayName": "TI CC2745R10 Build Buttons",
-    "publisher": "Benjamin Lucke",
+    "publisher": "benjamin-lucke",
     "description": "Adds build, clean, flash, and debug buttons for TI CC2745R10 development",
     "version": "1.0.0",
     "repository": {
@@ -74,42 +74,42 @@
             "ti-projects": [
                 { "id": "tiProjectExplorer", "name": "TI Project Explorer", "icon": "media/ti.svg" }
             ]
+        },
+        "configuration": {
+            "title": "TI CC2745R10",
+            "properties": {
+                "tiCCS.ccsPath": {
+                    "type": "string",
+                    "default": "C:/ti/ccs2020/ccs/eclipse/ccstudio.exe",
+                    "description": "Path to Code Composer Studio executable"
+                },
+                "tiCCS.sysconfigPath": {
+                    "type": "string",
+                    "default": "C:/ti/sysconfig_1.24.1/nw/nw.exe",
+                    "description": "Path to TI SysConfig executable"
+                },
+                "tiCCS.flashTool": {
+                    "type": "string",
+                    "default": "uniflash",
+                    "enum": ["uniflash", "ccs", "custom"],
+                    "description": "Flash tool to use"
+                },
+                "tiCCS.serialPort": {
+                    "type": "string",
+                    "default": "COM1",
+                    "description": "Serial port for monitoring (e.g., COM1, /dev/ttyUSB0)"
+                },
+                "tiCCS.baudRate": {
+                    "type": "number",
+                    "default": 115200,
+                    "description": "Baud rate for serial communication"
+                }
+            }
         }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "echo 'No compilation needed'",
         "watch": "echo 'No watch needed'"
-    },
-    "configuration": {
-        "title": "TI CC2745R10",
-        "properties": {
-            "tiCCS.ccsPath": {
-                "type": "string",
-                "default": "C:/ti/ccs2020/ccs/eclipse/ccstudio.exe",
-                "description": "Path to Code Composer Studio executable"
-            },
-            "tiCCS.sysconfigPath": {
-                "type": "string",
-                "default": "C:/ti/sysconfig_1.24.1/nw/nw.exe",
-                "description": "Path to TI SysConfig executable"
-            },
-            "tiCCS.flashTool": {
-                "type": "string",
-                "default": "uniflash",
-                "enum": ["uniflash", "ccs", "custom"],
-                "description": "Flash tool to use"
-            },
-            "tiCCS.serialPort": {
-                "type": "string",
-                "default": "COM1",
-                "description": "Serial port for monitoring (e.g., COM1, /dev/ttyUSB0)"
-            },
-            "tiCCS.baudRate": {
-                "type": "number",
-                "default": 115200,
-                "description": "Baud rate for serial communication"
-            }
-        }
     }
 }
