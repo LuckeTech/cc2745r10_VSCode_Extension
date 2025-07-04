@@ -20,7 +20,13 @@
         "onCommand:ti.rebuild",
         "onCommand:ti.flash",
         "onCommand:ti.debug",
-        "onCommand:ti.serial"
+        "onCommand:ti.serial",
+        "onCommand:ti.openSysConfig",
+        "onCommand:ti.openCCS",
+        "onCommand:ti.configure",
+        "onLanguage:c",
+        "onLanguage:cpp",
+        "workspaceContains:**/*.syscfg"
     ],
     "main": "./src/extension.js",
     "icon": "media/ti.png",
@@ -31,13 +37,32 @@
             { "command": "ti.rebuild", "title": "🔄 Rebuild", "category": "TI" },
             { "command": "ti.flash", "title": "📡 Flash", "category": "TI" },
             { "command": "ti.debug", "title": "🐛 Debug", "category": "TI" },
-            { "command": "ti.serial", "title": "📻 Serial", "category": "TI" }
+            { "command": "ti.serial", "title": "📻 Serial", "category": "TI" },
+            { "command": "ti.openSysConfig", "title": "⚙️ Open SysConfig", "category": "TI" },
+            { "command": "ti.openCCS", "title": "🎯 Open in CCS", "category": "TI" },
+            { "command": "ti.configure", "title": "⚙️ Configure Extension", "category": "TI" }
         ],
         "menus": {
             "editor/title": [
                 { "command": "ti.clean", "when": "resourceExtname == .c || resourceExtname == .h", "group": "navigation@1" },
                 { "command": "ti.build", "when": "resourceExtname == .c || resourceExtname == .h", "group": "navigation@2" },
-                { "command": "ti.flash", "when": "resourceExtname == .c || resourceExtname == .h", "group": "navigation@3" }
+                { "command": "ti.flash", "when": "resourceExtname == .c || resourceExtname == .h", "group": "navigation@3" },
+                { "command": "ti.openSysConfig", "when": "resourceExtname == .syscfg", "group": "navigation@1" }
+            ],
+            "explorer/context": [
+                { "command": "ti.openSysConfig", "when": "resourceExtname == .syscfg", "group": "ti@1" },
+                { "command": "ti.openCCS", "when": "explorerResourceIsFolder", "group": "ti@2" }
+            ],
+            "commandPalette": [
+                { "command": "ti.clean" },
+                { "command": "ti.build" },
+                { "command": "ti.rebuild" },
+                { "command": "ti.flash" },
+                { "command": "ti.debug" },
+                { "command": "ti.serial" },
+                { "command": "ti.openSysConfig" },
+                { "command": "ti.openCCS" },
+                { "command": "ti.configure" }
             ]
         },
         "viewsContainers": {
@@ -55,5 +80,41 @@
         "vscode:prepublish": "npm run compile",
         "compile": "echo 'No compilation needed'",
         "watch": "echo 'No watch needed'"
+    },
+    "configuration": {
+        "title": "TI CC2745R10",
+        "properties": {
+            "tiCCS.projectFolder": {
+                "type": "string",
+                "default": "",
+                "description": "Path to your TI CC2745R10 project folder"
+            },
+            "tiCCS.ccsPath": {
+                "type": "string",
+                "default": "C:/ti/ccs2020/ccs/eclipse/ccstudio.exe",
+                "description": "Path to Code Composer Studio executable"
+            },
+            "tiCCS.sysconfigPath": {
+                "type": "string",
+                "default": "C:/ti/sysconfig_1.24.1/nw/nw.exe",
+                "description": "Path to TI SysConfig executable"
+            },
+            "tiCCS.flashTool": {
+                "type": "string",
+                "default": "uniflash",
+                "enum": ["uniflash", "ccs", "custom"],
+                "description": "Flash tool to use"
+            },
+            "tiCCS.serialPort": {
+                "type": "string",
+                "default": "COM1",
+                "description": "Serial port for monitoring (e.g., COM1, /dev/ttyUSB0)"
+            },
+            "tiCCS.baudRate": {
+                "type": "number",
+                "default": 115200,
+                "description": "Baud rate for serial communication"
+            }
+        }
     }
 }
